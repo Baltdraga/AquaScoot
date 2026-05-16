@@ -71,8 +71,8 @@ static void sendEspNowPacket(float u, float i) {
 
   // Если значения валидны — пакуем их, иначе отправляем 0 (сигнал прочерков для ресивера)
   if (!isnan(u) && !isnan(i)) {
-    vr = (uint16_t)constrain((int)lroundf(u * 100.0f), 0, 65535);
-    ti = (uint8_t)constrain((int)lroundf(i * 10.0f), 0, 255);
+    vr = (uint16_t)constrain((int)lroundf(u), 0, 65535);
+    ti = (uint8_t)constrain((int)lroundf(i), 0, 255);
   }
 
   const uint8_t tx[4] = {

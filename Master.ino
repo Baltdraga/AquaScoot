@@ -51,8 +51,8 @@ struct StatusPacket {
 volatile uint32_t lastStatusMs = 0;
 volatile float slavePwmMs = MIN_PWM;
 
-volatile float packVoltageV = NAN;
-volatile float packCurrentA = NAN;
+volatile int packVoltageV = -1;
+volatile int packCurrentA = -1;
 
 uint8_t slaveMac[6] = {0};
 bool slaveKnown = false;
@@ -82,11 +82,11 @@ void onRx(const uint8_t* mac, const uint8_t* data, int len) {
     uint8_t i_raw = data[3];
 
     if (v_raw == 0 && i_raw == 0) {
-      packVoltageV = NAN;
-      packCurrentA = NAN;
+      packVoltageV = -1;
+      packCurrentA = -1;
     } else {
-      packVoltageV = v_raw * 0.01f;
-      packCurrentA = i_raw * 0.1f;
+      packVoltageV = constrain((int)v_raw, 0, 99);
+      packCurrentA = constrain((int)i_raw, 0, 250);
     }
     return;
   }
@@ -133,13 +133,12 @@ void drawDigit(int lvl, bool isStart) {
 
   char ub[8], ib[8]; 
 
-  // Напряжение БЕЗ десятых (округление до целого через %.0f)
-  if (isnan(packVoltageV)) snprintf(ub, sizeof(ub), "--");
-  else snprintf(ub, sizeof(ub), "%.0f", packVoltageV);
+  // Напряжение и ток без десятичных разделителей
+  if (packVoltageV < 0) snprintf(ub, sizeof(ub), "--");
+  else snprintf(ub, sizeof(ub), "%d", packVoltageV);
 
-  // Ток с одним знаком после запятой
-  if (isnan(packCurrentA)) snprintf(ib, sizeof(ib), "--");
-  else snprintf(ib, sizeof(ib), "%.1f", packCurrentA);
+  if (packCurrentA < 0) snprintf(ib, sizeof(ib), "--");
+  else snprintf(ib, sizeof(ib), "%d", packCurrentA);
 
   u8g2.clearBuffer();
 
